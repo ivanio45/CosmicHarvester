@@ -1,12 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;
-import java.util.Random;
 
 public class CosmicHarvester extends JFrame {
 
     private GamePanel gamePanel;
+    private MenuPanel menuPanel;
     private final int WINDOW_WIDTH = 800;
     private final int WINDOW_HEIGHT = 600;
 
@@ -16,11 +15,25 @@ public class CosmicHarvester extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+        setLayout(new CardLayout());
 
         gamePanel = new GamePanel();
-        add(gamePanel);
+        menuPanel = new MenuPanel(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        add(menuPanel, "menu");
+        add(gamePanel, "game");
+
+        menuPanel.getPlayButton().addActionListener(e -> {
+            showGamePanel();
+        });
 
         setVisible(true);
+    }
+
+    private void showGamePanel() {
+        CardLayout cardLayout = (CardLayout) getContentPane().getLayout();
+        cardLayout.show(getContentPane(), "game");
+        gamePanel.requestFocusInWindow();
     }
 
     public static void main(String[] args) {

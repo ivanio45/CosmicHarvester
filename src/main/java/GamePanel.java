@@ -17,6 +17,7 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
     private int score = 0;
     private boolean gameOver = false;
     private Random random = new Random();
+    private boolean paused = false;
 
     private int worldX = 0;
     private int worldY = 0;
@@ -84,7 +85,6 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
 
         player.draw(g, 0, 0);
 
-
         for (Asteroid asteroid : world.getAsteroids()) {
             asteroid.draw(g, worldX, worldY);
         }
@@ -107,15 +107,21 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
         g.drawString("Score: " + score, 10, 20);
         g.drawString("Health: " + player.getHealth(), 10, 40);
         g.drawString("Location: " + player.getLocationsCrossed(), 10, 60);
+
+        if (paused) {
+            g.setColor(new Color(255, 255, 255, 150));
+            g.fillRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT);
+
+            g.setColor(Color.RED);
+            g.setFont(new Font("Arial", Font.BOLD, 48));
+            String pauseText = "PAUSED";
+            int textWidth = g.getFontMetrics().stringWidth(pauseText);
+            g.drawString(pauseText, PANEL_WIDTH / 2 - textWidth / 2, PANEL_HEIGHT / 2);
+        }
     }
 
     public void update() {
-        if (!gameOver) {
-
-            if (inShop) {
-                return;
-            }
-
+        if (!gameOver && !paused && !inShop) {
             player.update(PANEL_WIDTH, PANEL_HEIGHT);
             world.updateWorldObjects(worldX, worldY, PANEL_WIDTH, PANEL_HEIGHT);
             updateBullets();
@@ -150,17 +156,12 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
         }
     }
 
-    private double distanceToCenter() {
-        int x = player.getX();
-        int y = player.getY();
-        return Math.sqrt(x * x + y * y);
-    }
 
     private void updateBullets() {
         for (int i = 0; i < bullets.size(); i++) {
             Bullet bullet = bullets.get(i);
             bullet.update();
-            if (bullet.getX() < worldX - 100 || bullet.getX() > worldX + PANEL_WIDTH + 100 || bullet.getY() < worldY || bullet.getY() > worldY + PANEL_HEIGHT) {
+            if (bullet.getX() < worldX - 100 || bullet.getX() > worldX + PANEL_WIDTH + 100 || bullet.getY() < worldY || bullet.getY() > worldY + PANEL_HEIGHT) { //Check if bullets are out of screen
                 bullets.remove(i);
                 i--;
             }
@@ -251,11 +252,18 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
             }
         }
         else if (gameOver) {
-            if(key == KeyEvent.VK_R) {
+            if (key == KeyEvent.VK_R) {
                 restartGame();
             }
-        }
-        else {
+        } else if (key == KeyEvent.VK_P || key == KeyEvent.VK_ESCAPE) {
+            paused = !paused;
+            if (paused) {
+                gameTimer.stop();
+            } else {
+                gameTimer.start();
+            }
+            repaint();
+        } else {
             player.keyPressed(e);
         }
     }
@@ -285,11 +293,12 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (running) {
+        if (running && !paused) {
             update();
         }
         repaint();
     }
+
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -298,7 +307,7 @@ public class GamePanel extends JPanel implements KeyListener, ActionListener, Mo
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (!gameOver && !inShop) {
+        if (!gameOver && !inShop && !paused) {
             shoot();
         }
     }
