@@ -1,4 +1,6 @@
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+
 
 class GameObject {
     protected int x;
