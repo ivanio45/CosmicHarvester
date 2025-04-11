@@ -1,13 +1,6 @@
 import java.awt.*;
 
 class Shop {
-
-    private GamePanel gamePanel;
-
-    public Shop(GamePanel gamePanel) {
-        this.gamePanel = gamePanel;
-    }
-
     public void draw(Graphics g) {
         g.setColor(Color.DARK_GRAY);
         g.fillRect(100, 100, 600, 400);
