@@ -1,3 +1,4 @@
+
 import java.awt.*;
 
 class ShopMarker extends GameObject {

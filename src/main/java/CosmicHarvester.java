@@ -1,6 +1,5 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class CosmicHarvester extends JFrame {
 
@@ -31,6 +30,8 @@ public class CosmicHarvester extends JFrame {
     }
 
     private void showGamePanel() {
+        Difficulty difficulty = menuPanel.getSelectedDifficulty();
+        gamePanel.setDifficulty(difficulty);
         CardLayout cardLayout = (CardLayout) getContentPane().getLayout();
         cardLayout.show(getContentPane(), "game");
         gamePanel.requestFocusInWindow();

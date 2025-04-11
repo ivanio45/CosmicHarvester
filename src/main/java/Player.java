@@ -5,30 +5,43 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-class Player extends GameObject {
+public class Player extends GameObject {
     private int speed = 5;
+    private int baseSpeed = 5; // Сохраняем базовую скорость
     private boolean up, down, left, right;
     private int health = 100;
-    private GamePanel gamePanel;
-    private int locationsCrossed = 0;
     private int damage = 20;
+    private int lowHealthThreshold = 50; // Порог здоровья, при котором скорость снижается
+    private double speedReductionPercentage = 0.5;
+    private int locationsCrossed = 0;
+    private int experience = 0;
+    private int experienceToLevelUp = 100;
+    private int level = 1; // Добавляем уровень
     private BufferedImage shipImage;
+    private GamePanel gamePanel;
 
     public Player(int x, int y, int width, int height, GamePanel gamePanel) {
         super(x, y, width, height);
         this.gamePanel = gamePanel;
         this.color = Color.GREEN;
-
         try {
-            shipImage = ImageIO.read(new File("C:\\Users\\antip\\IdeaProjects\\CosmicHarvester\\CosmicHarvester\\src\\main\\resources\\SpaceShip.png"));  // Замените на актуальный путь!
+            shipImage = ImageIO.read(new File("resources/SpaceShip.png"));
         } catch (IOException e) {
             System.err.println("Не удалось загрузить изображение корабля: " + e.getMessage());
-            shipImage = null; // Важно!
+            shipImage = null;
         }
     }
 
     public void update(int panelWidth, int panelHeight) {
+        int currentSpeed = speed; // Store speed before modification
 
+        if (health < lowHealthThreshold) {
+            speed = (int) (baseSpeed * speedReductionPercentage); // Reduce speed if health is low
+        } else {
+            speed = baseSpeed; // Reset to base speed if health is above the threshold
+        }
+
+        // Movement logic with the calculated speed
         if (up) {
             y -= speed;
         }
@@ -41,7 +54,6 @@ class Player extends GameObject {
         if (right) {
             x += speed;
         }
-
 
         if (x < 0) {
             x = panelWidth;
@@ -56,17 +68,19 @@ class Player extends GameObject {
         if (y < 0) {
             y = panelHeight;
             locationsCrossed++;
-            gamePanel.generateObjectsAroundPlayer();
         }
         if (y > panelHeight) {
             y = 0;
             locationsCrossed++;
         }
+
+        if(currentSpeed != speed){
+            gamePanel.repaint(); // update values in shop
+        }
     }
 
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-
         if (key == KeyEvent.VK_W) {
             up = true;
         }
@@ -83,7 +97,6 @@ class Player extends GameObject {
 
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
-
         if (key == KeyEvent.VK_W) {
             up = false;
         }
@@ -106,14 +119,6 @@ class Player extends GameObject {
         this.health = health;
     }
 
-    public int getLocationsCrossed() {
-        return locationsCrossed;
-    }
-
-    public void setLocationsCrossed(int locationsCrossed) {
-        this.locationsCrossed = locationsCrossed;
-    }
-
     public int getDamage() {
         return damage;
     }
@@ -122,13 +127,58 @@ class Player extends GameObject {
         this.damage = damage;
     }
 
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+
+    public int getBaseSpeed() {
+        return baseSpeed;
+    }
+
+    public void setBaseSpeed(int baseSpeed) {
+        this.baseSpeed = baseSpeed;
+    }
+
+    public int getLocationsCrossed() {
+        return locationsCrossed;
+    }
+
+    public void setLocationsCrossed(int locationsCrossed) {
+        this.locationsCrossed = locationsCrossed;
+    }
+
+    public int getExperience() { // NEW: Getter for experience
+        return experience;
+    }
+
+    public void setExperience(int experience) { // NEW: Setter for experience
+        this.experience = experience;
+    }
+
+    public void addExperience(int amount) {
+        this.experience += amount;
+        // You can add level up logic here if you want
+    }
+
     @Override
     public void draw(Graphics g, int worldX, int worldY) {
         if (shipImage != null) {
-            g.drawImage(shipImage, x - worldX, y - worldY, width, height, null);
+            g.drawImage(shipImage, x, y, width, height, null);
         } else {
             g.setColor(color);
-            g.fillRect(x - worldX, y - worldY, width, height);
+            g.fillRect(x, y, width, height);
         }
     }
 }
